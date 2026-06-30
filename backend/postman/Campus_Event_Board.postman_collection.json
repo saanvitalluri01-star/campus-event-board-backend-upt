@@ -1,0 +1,181 @@
+{
+  "info": {
+    "name": "Campus Event Board API",
+    "description": "Full API collection for Campus Event Board backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "token", "value": "" },
+    { "key": "eventId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        { "name": "Root", "request": { "method": "GET", "url": "{{baseUrl}}/" } },
+        { "name": "Health Check", "request": { "method": "GET", "url": "{{baseUrl}}/health" } }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register Student",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Test Student\",\n  \"email\": \"teststudent@example.com\",\n  \"password\": \"Student@123\",\n  \"role\": \"student\"\n}" },
+            "url": "{{baseUrl}}/api/auth/register"
+          }
+        },
+        {
+          "name": "Register Organizer",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Test Organizer\",\n  \"email\": \"testorg@example.com\",\n  \"password\": \"Organizer@123\",\n  \"role\": \"organizer\"\n}" },
+            "url": "{{baseUrl}}/api/auth/register"
+          }
+        },
+        {
+          "name": "Login (Student)",
+          "event": [{ "listen": "test", "script": { "exec": ["if(pm.response.code===200){pm.collectionVariables.set('token',pm.response.json().data.token)}"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"aarav@student.edu\",\n  \"password\": \"Student@123\"\n}" },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Login (Organizer)",
+          "event": [{ "listen": "test", "script": { "exec": ["if(pm.response.code===200){pm.collectionVariables.set('token',pm.response.json().data.token)}"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"arjun.mehta@campus.edu\",\n  \"password\": \"Organizer@123\"\n}" },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Login (Admin)",
+          "event": [{ "listen": "test", "script": { "exec": ["if(pm.response.code===200){pm.collectionVariables.set('token',pm.response.json().data.token)}"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@campus.edu\",\n  \"password\": \"Admin@123\"\n}" },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/auth/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Events — Public",
+      "item": [
+        { "name": "Get All Events", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/events?page=1&limit=10", "query": [{"key":"page","value":"1"},{"key":"limit","value":"10"}] } } },
+        { "name": "Search Events", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/events?search=hackathon", "query": [{"key":"search","value":"hackathon"}] } } },
+        { "name": "Filter by Category", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/events?category=tech", "query": [{"key":"category","value":"tech"}] } } },
+        { "name": "Filter by Status", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/events?status=upcoming", "query": [{"key":"status","value":"upcoming"}] } } },
+        { "name": "Sort by Popularity", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/events?sortBy=rsvpCount&sortOrder=desc", "query": [{"key":"sortBy","value":"rsvpCount"},{"key":"sortOrder","value":"desc"}] } } },
+        { "name": "Get Upcoming Events", "request": { "method": "GET", "url": "{{baseUrl}}/api/events/upcoming" } },
+        { "name": "Get Popular Events", "request": { "method": "GET", "url": "{{baseUrl}}/api/events/popular" } },
+        { "name": "Get Event by ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/events/{{eventId}}" } }
+      ]
+    },
+    {
+      "name": "Events — Protected",
+      "item": [
+        {
+          "name": "Create Event (Organizer)",
+          "event": [{ "listen": "test", "script": { "exec": ["if(pm.response.code===201){pm.collectionVariables.set('eventId',pm.response.json().data._id)}"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"New Tech Workshop\",\n  \"description\": \"A hands-on workshop covering the latest web technologies. Come and learn from industry experts.\",\n  \"category\": \"tech\",\n  \"date\": \"2025-12-30T10:00:00.000Z\",\n  \"venue\": \"Computer Lab 1, Block B\",\n  \"maxCapacity\": 50,\n  \"imageURL\": \"https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800\",\n  \"tags\": [\"tech\", \"workshop\", \"web\"]\n}" },
+            "url": "{{baseUrl}}/api/events"
+          }
+        },
+        {
+          "name": "Update Event",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Updated Workshop Title\",\n  \"maxCapacity\": 75\n}" },
+            "url": "{{baseUrl}}/api/events/{{eventId}}"
+          }
+        },
+        {
+          "name": "Delete Event",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/events/{{eventId}}"
+          }
+        },
+        {
+          "name": "RSVP to Event",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/events/{{eventId}}/rsvp"
+          }
+        },
+        {
+          "name": "Cancel RSVP",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/events/{{eventId}}/rsvp"
+          }
+        },
+        {
+          "name": "Get Attendees (Organizer)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/events/{{eventId}}/attendees"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "My Created Events (Organizer)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/users/my-events"
+          }
+        },
+        {
+          "name": "My RSVPs (Student)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/users/my-rsvps"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Error Cases",
+      "item": [
+        { "name": "Invalid ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/events/badid123" } },
+        { "name": "No Token on Protected Route", "request": { "method": "POST", "url": "{{baseUrl}}/api/events" } },
+        { "name": "Weak Password on Register", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "raw": "{\"name\":\"x\",\"email\":\"x@x.com\",\"password\":\"weak\"}" }, "url": "{{baseUrl}}/api/auth/register" } },
+        { "name": "Route Not Found", "request": { "method": "GET", "url": "{{baseUrl}}/api/notexist" } }
+      ]
+    }
+  ]
+}
